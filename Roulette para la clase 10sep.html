@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La roue des affirmations — Français VIII</title>
+<style>
+  :root{
+    --marine:#062044;
+    --marine-clair:#0d3a72;
+    --or:#c9a227;
+    --or-clair:#e8d089;
+    --papier:#f7f5f0;
+    --encre:#12171f;
+    --gris:#6b7280;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);
+    color:var(--encre);
+    min-height:100vh;
+    padding:28px 32px 40px;
+  }
+  .bandeau{
+    display:flex;align-items:baseline;gap:16px;
+    border-bottom:2px solid var(--marine);
+    padding-bottom:10px;margin-bottom:26px;
+  }
+  .bandeau h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.6rem;font-weight:normal;color:var(--marine);
+    letter-spacing:.01em;
+  }
+  .bandeau span{font-size:.95rem;color:var(--gris)}
+
+  .grille{
+    display:grid;
+    grid-template-columns:300px minmax(300px,380px) 1fr;
+    gap:36px;align-items:start;
+  }
+
+  /* ---------- roue des noms ---------- */
+  .zone-noms{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+  .titre-colonne{
+    font-family:Georgia,serif;font-size:1.05rem;color:var(--marine);
+    align-self:flex-start;border-bottom:1px solid var(--or);padding-bottom:4px;
+  }
+  .roue-noms-cadre{position:relative;width:100%;max-width:260px}
+  .fleche-noms{
+    position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border-left:12px solid transparent;
+    border-right:12px solid transparent;border-top:20px solid var(--marine);
+    z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  }
+  #groupe-noms{transition:transform 4.2s cubic-bezier(.17,.67,.14,1)}
+  .part.utilise{opacity:.15}
+  .nom-choisi{
+    width:100%;background:#fff;border:1px solid #e0e3e8;
+    border-left:5px solid var(--or);border-radius:0 3px 3px 0;
+    padding:18px 20px;min-height:96px;display:flex;align-items:center;
+  }
+  .nom-choisi .nom{
+    font-family:Georgia,serif;font-size:1.5rem;line-height:1.25;color:var(--marine);
+  }
+  .nom-choisi .attente{font-size:1rem;color:var(--gris);line-height:1.45}
+  #tourner-noms{padding:11px 24px;font-size:.95rem}
+
+  /* ---------- roue ---------- */
+  .zone-roue{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .roue-cadre{position:relative;width:100%;max-width:420px}
+  .fleche{
+    position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border-left:16px solid transparent;
+    border-right:16px solid transparent;border-top:26px solid var(--marine);
+    z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  }
+  svg{width:100%;height:auto;display:block}
+  #groupe-roue{transition:transform 4.6s cubic-bezier(.17,.67,.14,1)}
+  .num{
+    font-family:Georgia,serif;font-size:19px;fill:#fff;
+    text-anchor:middle;dominant-baseline:middle;
+  }
+  .num.sombre{fill:var(--marine)}
+  .segment.utilise{opacity:.22}
+
+  button{
+    font-family:inherit;font-size:1rem;cursor:pointer;
+    border:none;border-radius:2px;padding:13px 30px;
+    background:var(--marine);color:#fff;letter-spacing:.02em;
+    transition:background .15s;
+  }
+  button:hover:not(:disabled){background:var(--marine-clair)}
+  button:disabled{background:#c2c6cc;cursor:default}
+  button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+  .secondaire{
+    background:none;color:var(--gris);border:1px solid #cfd3d9;
+    padding:9px 18px;font-size:.86rem;
+  }
+  .secondaire:hover:not(:disabled){background:#eceef1;color:var(--encre)}
+  .restantes{font-size:.86rem;color:var(--gris)}
+
+  /* ---------- panneau ---------- */
+  .panneau{min-height:440px;display:flex;flex-direction:column;gap:22px}
+
+  .consigne{
+    background:var(--marine);color:#fff;padding:20px 24px;border-radius:3px;
+  }
+  .consigne p{font-size:1rem;line-height:1.55;max-width:62ch}
+  .consigne strong{color:var(--or-clair);font-weight:600}
+
+  .affirmation{
+    border-left:5px solid var(--or);
+    background:#fff;padding:26px 28px;border-radius:0 3px 3px 0;
+    box-shadow:0 1px 3px rgba(6,32,68,.09);
+  }
+  .affirmation .numero{
+    font-family:Georgia,serif;font-size:.95rem;color:var(--or);
+    margin-bottom:8px;
+  }
+  .affirmation q{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.85rem;line-height:1.35;color:var(--marine);
+    display:block;max-width:30ch;quotes:"«\00a0" "\00a0»";
+  }
+  .vide{
+    font-family:Georgia,serif;font-size:1.3rem;color:var(--gris);
+    line-height:1.5;padding:26px 0;max-width:34ch;
+  }
+
+  .connecteurs{display:flex;flex-wrap:wrap;gap:14px}
+  .carte{
+    flex:1 1 190px;background:#fff;border:1px solid #e0e3e8;
+    border-top:3px solid var(--marine);padding:14px 16px;border-radius:2px;
+  }
+  .carte .role{font-size:.78rem;color:var(--gris);margin-bottom:6px}
+  .carte .mot{
+    font-family:Georgia,serif;font-size:1.35rem;color:var(--marine);
+  }
+  .carte .sens{
+    font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:.85rem;color:var(--gris);white-space:nowrap;
+  }
+
+  .minuteur{
+    display:flex;align-items:center;gap:18px;
+    border-top:1px solid #dcdfe4;padding-top:18px;margin-top:auto;
+  }
+  #chrono{
+    font-family:Georgia,serif;font-size:2.6rem;color:var(--marine);
+    min-width:120px;font-variant-numeric:tabular-nums;
+  }
+  #chrono.fini{color:#a12b1e}
+
+  @media (max-width:1180px){
+    .grille{grid-template-columns:280px 1fr}
+    .panneau{grid-column:1 / -1}
+  }
+  @media (max-width:860px){
+    .grille{grid-template-columns:1fr;gap:30px}
+    body{padding:20px}
+    .affirmation q{font-size:1.5rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #groupe-roue,#groupe-noms{transition-duration:.6s}
+  }
+</style>
+</head>
+<body>
+
+<div class="bandeau">
+  <h1>La roue des affirmations</h1>
+  <span>Français VIII — argumenter avec les connecteurs</span>
+</div>
+
+<div class="grille">
+
+  <div class="zone-noms">
+    <p class="titre-colonne">Qui parle ?</p>
+    <div class="roue-noms-cadre">
+      <div class="fleche-noms"></div>
+      <svg viewBox="0 0 300 300" role="img" aria-label="Roue des étudiants">
+        <g id="groupe-noms" transform-origin="150 150"></g>
+        <circle cx="150" cy="150" r="22" fill="#fff" stroke="#062044" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="nom-choisi" id="bloc-nom">
+      <p class="attente">Tournez la roue pour désigner un étudiant.</p>
+    </div>
+    <button id="tourner-noms">Désigner un étudiant</button>
+    <button id="recommencer-noms" class="secondaire">Remettre toute la classe</button>
+    <p class="restantes"><span id="compteur-noms">40</span> étudiants restants</p>
+  </div>
+
+  <div class="zone-roue">
+    <div class="roue-cadre">
+      <div class="fleche"></div>
+      <svg viewBox="0 0 400 400" role="img" aria-label="Roue de douze affirmations">
+        <g id="groupe-roue" transform-origin="200 200"></g>
+        <circle cx="200" cy="200" r="30" fill="#fff" stroke="#062044" stroke-width="3"/>
+      </svg>
+    </div>
+    <button id="tourner">Tourner la roue</button>
+    <button id="recommencer" class="secondaire">Remettre les 12 affirmations</button>
+    <p class="restantes"><span id="compteur">12</span> affirmations restantes</p>
+  </div>
+
+  <div class="panneau">
+
+    <div class="consigne">
+      <p>Tournez la roue. Vous avez <strong>une minute</strong> pour réagir à l'affirmation <strong>à l'oral</strong> : êtes-vous pour ou contre, et pourquoi ? Vous devez employer les <strong>trois connecteurs imposés</strong> — ils changent à chaque tour.</p>
+    </div>
+
+    <div class="affirmation" id="bloc-affirmation">
+      <p class="vide">Tournez la roue pour découvrir votre affirmation et les connecteurs à employer.</p>
+    </div>
+
+    <div class="connecteurs" id="bloc-connecteurs"></div>
+
+    <div class="minuteur">
+      <div id="chrono">1:00</div>
+      <button id="lancer" class="secondaire">Lancer la minute</button>
+      <button id="reinitialiser" class="secondaire">Remettre à zéro</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const affirmations = [
+  "Il vaut mieux vivre seul qu'avec des colocataires.",
+  "On apprend mieux une langue en voyageant qu'en classe.",
+  "Les téléphones portables devraient être interdits à l'université.",
+  "Un bon professeur doit être sévère.",
+  "Il faut travailler pendant ses études.",
+  "Manger chez soi est toujours meilleur qu'aller au restaurant.",
+  "Les réseaux sociaux nous rendent moins sociables.",
+  "Il vaut mieux voyager seul qu'en groupe.",
+  "Le sport devrait être obligatoire à l'université.",
+  "On vit mieux à la campagne qu'en ville.",
+  "Les cours du soir sont plus efficaces que les cours du matin.",
+  "Il vaut mieux garder ses amis d'enfance que d'en chercher de nouveaux."
+];
+
+const familles = [
+  { role:"Apporter une preuve", mots:[
+      ["car","porque"],["étant donné que","dado que"],["puisque","puesto que"],
+      ["comme","como / ya que"],["en effet","en efecto"],["vu que","visto que"]] },
+  { role:"S'opposer", mots:[
+      ["au contraire","al contrario"],["cependant","sin embargo"],["en revanche","en cambio"],
+      ["malgré","a pesar de (+ sust.)"],["tandis que","mientras que"],["pourtant","no obstante"]] },
+  { role:"Conclure", mots:[
+      ["donc","por lo tanto"],["par conséquent","por consiguiente"],["c'est pourquoi","por eso"],
+      ["pour conclure","para concluir"],["ainsi","así pues"],["finalement","finalmente"]] }
+];
+
+// dégradé marine → or, cohérent avec la charte
+const couleurs = ["#062044","#0b3163","#114080","#1a5090","#2a6394","#3d7794",
+                  "#5d8a83","#84996a","#a8a44f","#c1a63a","#d4ae35","#e3c163"];
+const clairs = [9,10,11]; // segments où le chiffre doit être foncé
+
+const groupe = document.getElementById("groupe-roue");
+const N = affirmations.length, ANGLE = 360 / N, R = 170;
+
+function polaire(deg, r){
+  const rad = (deg - 90) * Math.PI / 180;
+  return [200 + r * Math.cos(rad), 200 + r * Math.sin(rad)];
+}
+
+affirmations.forEach((_, i) => {
+  const d1 = i * ANGLE, d2 = (i + 1) * ANGLE;
+  const [x1,y1] = polaire(d1, R), [x2,y2] = polaire(d2, R);
+  const chemin = document.createElementNS("http://www.w3.org/2000/svg","path");
+  chemin.setAttribute("d", `M200,200 L${x1},${y1} A${R},${R} 0 0,1 ${x2},${y2} Z`);
+  chemin.setAttribute("fill", couleurs[i]);
+  chemin.setAttribute("stroke", "#f7f5f0");
+  chemin.setAttribute("stroke-width", "2");
+  chemin.setAttribute("class", "segment");
+  chemin.dataset.index = i;
+  groupe.appendChild(chemin);
+
+  const [tx,ty] = polaire(d1 + ANGLE/2, R * 0.74);
+  const txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+  txt.setAttribute("x", tx); txt.setAttribute("y", ty);
+  txt.setAttribute("class", "num" + (clairs.includes(i) ? " sombre" : ""));
+  txt.setAttribute("transform", `rotate(${d1 + ANGLE/2},${tx},${ty})`);
+  txt.textContent = i + 1;
+  groupe.appendChild(txt);
+});
+
+let restantes = affirmations.map((_, i) => i);
+let rotation = 0, enCours = false;
+
+const btnTourner = document.getElementById("tourner");
+const btnRecommencer = document.getElementById("recommencer");
+const compteur = document.getElementById("compteur");
+const blocAff = document.getElementById("bloc-affirmation");
+const blocCon = document.getElementById("bloc-connecteurs");
+
+function tirer(liste){ return liste[Math.floor(Math.random() * liste.length)]; }
+
+btnTourner.addEventListener("click", () => {
+  if (enCours || restantes.length === 0) return;
+  enCours = true;
+  btnTourner.disabled = true;
+
+  const pos = Math.floor(Math.random() * restantes.length);
+  const idx = restantes.splice(pos, 1)[0];
+
+  const vise = ((-(idx * ANGLE + ANGLE/2)) % 360 + 360) % 360;
+  const actuel = ((rotation % 360) + 360) % 360;
+  let ecart = vise - actuel;
+  if (ecart < 0) ecart += 360;
+  rotation += 360 * 5 + ecart;
+  groupe.style.transform = `rotate(${rotation}deg)`;
+
+  setTimeout(() => {
+    blocAff.innerHTML =
+      `<p class="numero">Affirmation ${idx + 1}</p><q>${affirmations[idx]}</q>`;
+
+    blocCon.innerHTML = familles.map(f => {
+      const [mot, sens] = tirer(f.mots);
+      return `<div class="carte"><p class="role">${f.role}</p>` +
+             `<p class="mot">${mot} <span class="sens">(${sens})</span></p></div>`;
+    }).join("");
+
+    const seg = groupe.querySelector(`.segment[data-index="${idx}"]`);
+    if (seg) seg.classList.add("utilise");
+
+    compteur.textContent = restantes.length;
+    enCours = false;
+    btnTourner.disabled = restantes.length === 0;
+    remettreChrono();
+  }, 4700);
+});
+
+btnRecommencer.addEventListener("click", () => {
+  if (enCours) return;
+  restantes = affirmations.map((_, i) => i);
+  compteur.textContent = restantes.length;
+  btnTourner.disabled = false;
+  groupe.querySelectorAll(".segment").forEach(s => s.classList.remove("utilise"));
+  blocAff.innerHTML = `<p class="vide">Tournez la roue pour découvrir votre affirmation et les connecteurs à employer.</p>`;
+  blocCon.innerHTML = "";
+  remettreChrono();
+});
+
+/* ---------- roue des étudiants ---------- */
+const etudiants = [
+  "Isabella Álvarez","Holdan Javier Beltrán","Mariana Buitrago","Samantha Vanesa Burgos",
+  "Alison Cabrera","Julián David Carabalí","Dayanna Andrea Castaño","Tatiana Caviedez",
+  "Julián Andrés Ceballos","Stephania Chantre","Paula Adriana Clarete","Daniela Cruz Gordillo",
+  "Jhoan Sebastián Cruz Marines","Luis Alejandro Cuevas","Miguel Ángel Díaz","Mariana Gacharná",
+  "Samir Esteban Galindo","Steven Giraldo","Natalia Isabella Guerrero","Samantha Annarela Heras",
+  "William Andrés Hernández","Kazandra López","Grace Tatiana Lucumí Mina","Lina Marcela Lucumí Ríos",
+  "Gabriela Madrid","María José Marmolejo","Joseph Camilo Meneses","Valentina Mina",
+  "Karent Sofía Monroy","María Fernanda Murillo","Laura Julieth Ochoa","María del Mar Oyola",
+  "David Portocarrero","Didier Andrés Rentería","Karen Juliana Reyes","Yojan Arley Rodallega",
+  "Valentina Santos","Karen Juliana Suárez","Karen Vanesa Victoria","Isabella Vidal"
+];
+
+const groupeNoms = document.getElementById("groupe-noms");
+const M = etudiants.length, ANGLE_N = 360 / M, RN = 128;
+
+function polaireN(deg, r){
+  const rad = (deg - 90) * Math.PI / 180;
+  return [150 + r * Math.cos(rad), 150 + r * Math.sin(rad)];
+}
+
+etudiants.forEach((_, i) => {
+  const d1 = i * ANGLE_N, d2 = (i + 1) * ANGLE_N;
+  const [x1,y1] = polaireN(d1, RN), [x2,y2] = polaireN(d2, RN);
+  const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d", `M150,150 L${x1},${y1} A${RN},${RN} 0 0,1 ${x2},${y2} Z`);
+  p.setAttribute("fill", i % 2 ? "#0d3a72" : "#c9a227");
+  p.setAttribute("stroke", "#f7f5f0");
+  p.setAttribute("stroke-width", "1.2");
+  p.setAttribute("class", "part");
+  p.dataset.index = i;
+  groupeNoms.appendChild(p);
+});
+
+let restantsNoms = etudiants.map((_, i) => i);
+let rotationNoms = 0, enCoursNoms = false;
+
+const btnNoms = document.getElementById("tourner-noms");
+const btnResetNoms = document.getElementById("recommencer-noms");
+const compteurNoms = document.getElementById("compteur-noms");
+const blocNom = document.getElementById("bloc-nom");
+
+compteurNoms.textContent = restantsNoms.length;
+
+btnNoms.addEventListener("click", () => {
+  if (enCoursNoms || restantsNoms.length === 0) return;
+  enCoursNoms = true;
+  btnNoms.disabled = true;
+
+  const pos = Math.floor(Math.random() * restantsNoms.length);
+  const idx = restantsNoms.splice(pos, 1)[0];
+
+  const vise = ((-(idx * ANGLE_N + ANGLE_N/2)) % 360 + 360) % 360;
+  const actuel = ((rotationNoms % 360) + 360) % 360;
+  let ecart = vise - actuel;
+  if (ecart < 0) ecart += 360;
+  rotationNoms += 360 * 5 + ecart;
+  groupeNoms.style.transform = `rotate(${rotationNoms}deg)`;
+
+  setTimeout(() => {
+    blocNom.innerHTML = `<p class="nom">${etudiants[idx]}</p>`;
+    const part = groupeNoms.querySelector(`.part[data-index="${idx}"]`);
+    if (part) part.classList.add("utilise");
+    compteurNoms.textContent = restantsNoms.length;
+    enCoursNoms = false;
+    btnNoms.disabled = restantsNoms.length === 0;
+    if (restantsNoms.length === 0){
+      blocNom.innerHTML = `<p class="nom">${etudiants[idx]}</p>`;
+      btnNoms.textContent = "Toute la classe est passée";
+    }
+  }, 4300);
+});
+
+btnResetNoms.addEventListener("click", () => {
+  if (enCoursNoms) return;
+  restantsNoms = etudiants.map((_, i) => i);
+  compteurNoms.textContent = restantsNoms.length;
+  btnNoms.disabled = false;
+  btnNoms.textContent = "Désigner un étudiant";
+  groupeNoms.querySelectorAll(".part").forEach(p => p.classList.remove("utilise"));
+  blocNom.innerHTML = `<p class="attente">Tournez la roue pour désigner un étudiant.</p>`;
+});
+
+/* ---------- chronomètre ---------- */
+const chrono = document.getElementById("chrono");
+const btnLancer = document.getElementById("lancer");
+const btnRaz = document.getElementById("reinitialiser");
+let secondes = 60, minuterie = null;
+
+function afficher(){
+  const m = Math.floor(secondes / 60);
+  const s = String(secondes % 60).padStart(2, "0");
+  chrono.textContent = `${m}:${s}`;
+}
+function remettreChrono(){
+  clearInterval(minuterie); minuterie = null;
+  secondes = 60; chrono.classList.remove("fini");
+  btnLancer.textContent = "Lancer la minute";
+  afficher();
+}
+btnLancer.addEventListener("click", () => {
+  if (minuterie){
+    clearInterval(minuterie); minuterie = null;
+    btnLancer.textContent = "Reprendre";
+    return;
+  }
+  if (secondes === 0) remettreChrono();
+  btnLancer.textContent = "Pause";
+  minuterie = setInterval(() => {
+    secondes--; afficher();
+    if (secondes <= 0){
+      clearInterval(minuterie); minuterie = null;
+      chrono.classList.add("fini");
+      chrono.textContent = "Stop";
+      btnLancer.textContent = "Lancer la minute";
+    }
+  }, 1000);
+});
+btnRaz.addEventListener("click", remettreChrono);
+
+afficher();
+</script>
+</body>
+</html>
